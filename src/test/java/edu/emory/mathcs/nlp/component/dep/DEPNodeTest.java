@@ -41,7 +41,42 @@ public class DEPNodeTest
 		// TODO:
 		System.out.println(Joiner.join(nodes, "\n"));
 	}
-	
+	@Test
+	public void TestDependent(){
+		DEPNode root=new DEPNode();
+		DEPNode A = new DEPNode(1,"A","a","DT",new FeatMap("current=a|next=record"));
+		DEPNode record=new DEPNode(2,"record","record","NN",new FeatMap());
+		DEPNode date=new DEPNode(3,"date","date","NN",new FeatMap());
+		DEPNode has=new DEPNode(4,"has","have","VBZ",new FeatMap());
+		DEPNode not=new DEPNode(5,"n't","not","RB",new FeatMap());
+		DEPNode been=new DEPNode(6,"been","be","VBN",new FeatMap());
+		DEPNode set=new DEPNode(7,"set","set","VBN",new FeatMap());
+		
+		date.addDependent(A,"det");
+		date.addDependent(record,"nn");
+		set.addDependent(date,"nsubjpass");
+		set.addDependent(has,"aux");
+		set.addDependent(not,"neg");
+		set.addDependent(been,"auxpass");
+		root.addDependent(set,"root");
+		
+		assertEquals(1, A.getID());
+		assertEquals("n't",not.getWordForm());
+		assertEquals(date.getDependent(1).getPOSTag(),"NN");
+		assertEquals(set.getRightMostDependent(),null);
+		assertEquals("record",A.getFeat("next"));
+		A.removeFeat("current");
+		assertEquals(null,A.getFeat("current"));
+		List<DEPNode> setdepens=set.getDependentList();
+		assertEquals(date,setdepens.get(0));
+		assertEquals(A.getHead().getDependentSize(),record.getHead().getDependentSize());
+		assertEquals(A.getLowestCommonAncestor(not),set);
+		assertEquals(A.getGrandHead(),been.getHead());
+		assertEquals(not.getLeftNearestSibling().getRightNearestSibling(),not);
+		assertEquals(has.getRightNearestSibling(1),been);
+		
+				
+	}
 	@Test
 	public void testBasicFields()
 	{
